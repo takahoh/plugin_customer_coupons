@@ -26,14 +26,33 @@ B2C Commerce には「顧客が使えるクーポンをマイページで一覧�
   省略すると「そのクーポンがセッションバスケットに入っている」場合しかクーポン付きプロモが返らず、
   カートが空のマイページでは一覧が常に空になります。
 
-- **`getNextCouponCode()` は型によって挙動が違う。**
-  `dw.campaign.Coupon` でコードを読むメソッドは `getNextCouponCode()`（プロパティ `nextCouponCode`）のみで、`getCouponCode()` は存在しません。
-  - `SINGLE_CODE` … 常に同一の固定コードを返すだけで消費しない（要 `Transaction`）。本カートリッジはこの型のときだけ実コードを表示します。
-  - `MULTIPLE_CODES` / `SYSTEM_CODES` … 呼ぶたびに未発行コードを1つ**発行（消費）＋DBロック**。一覧・判定のループで呼ぶと本番障害につながるため**絶対に呼びません**。一覧では実コードを出さず「カートに入れて取得する」導線にします。
-
 - **`getDiscounts()` では未適用クーポンの可否は判定できない。**
   `getDiscounts()` は「すでに適用済み／適用可能な割引」しか返しません。
   未適用クーポンが使えるかは ②の試験適用＋ロールバックで判定します（SFRA 標準 `Cart.js` と同型）。
+
+---
+
+## ⚠️ 重要 — 表示用クーポンコードの取り扱い（必読）
+
+**`getNextCouponCode()` は「コードを読む」メソッドではなく「未発行コードを1つ発行（issue）する書き込み操作」です。SINGLE_CODE でも消費します。**
+
+`dw.campaign.Coupon` でコードを読む手段は `getNextCouponCode()`（プロパティ `nextCouponCode`）**しか存在せず**、`getCouponCode()` というメソッドはありません（呼ぶと `ReferenceError: Unknown property 'getCouponCode'`）。
+
+実機（SFRA / RefArch）で確認した挙動:
+
+- SINGLE_CODE クーポンでも、同じクーポンに対して連続で呼ぶと **1回目はコードを返し、2回目以降は `null`**（＝発行済みになる）。公式ドキュメントの「single-code は固定コードを返す」は *未発行のうちだけ* の意味で、「消費しない」ではありません。
+- `Transaction.wrap()`（コミット）で呼ぶと、その固定コードが**発行済みになり以後 `null` しか返らなくなります**。
+- さらに、`getActiveCustomerPromotions()` から得た `Coupon` は PromotionPlan 上の**スナップショット**で `getNextCouponCode()` が常に `null` を返します。実コードは `CouponMgr.getCoupon(id)` で**ライブの Coupon** を解決してから読む必要があります。
+
+### 本カートリッジの実装（検証用）
+
+本カートリッジの [`couponHelpers.readSingleCodeForDisplay()`](cartridges/plugin_customer_coupons/cartridge/scripts/helpers/couponHelpers.js) は、SINGLE_CODE のコードを表示するために **`Transaction.begin()` → `getNextCouponCode()` → 必ず `rollback()`** で囲み、発行を巻き戻します。
+
+これは **検証用・低トラフィック限定** の実装です。rollback しても **その1コードの行ロックを毎リクエストで奪い合う**ため、人気クーポン × 高トラフィックでは行ロック競合によりサイトダウンに至り得ます（過去に本番障害の実例あり）。
+
+### 本番で推奨する方式
+
+一覧の「表示用コード」を **Coupon から読まない**。Promotion のカスタム属性（例: `displayCouponCode`）など**非破壊なソース**にコードを持たせ、それを読み取ってください。`getNextCouponCode()`（コミット）を呼んでよいのは、**カートで条件成立時に MULTIPLE/SYSTEM コードを 1 回だけ発行する**ケースに限られます。
 
 ---
 
