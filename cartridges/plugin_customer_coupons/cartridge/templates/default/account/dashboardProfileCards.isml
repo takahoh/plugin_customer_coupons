@@ -1,0 +1,30 @@
+<iscomment>
+    app_storefront_base/account/dashboardProfileCards の上書き。
+    標準のカード構成に「利用可能クーポン」への導線カードを追加する。
+</iscomment>
+<div class="row justify-content-center">
+    <div class="col-sm-6">
+        <iscomment>Profile</iscomment>
+        <isinclude template="account/profileCard"/>
+
+        <isif condition="${!pdict.account.isExternallyAuthenticated}">
+            <iscomment>Password</iscomment>
+            <isinclude template="account/passwordCard"/>
+        </isif>
+
+        <iscomment>Address Book</iscomment>
+        <isinclude template="account/addressBookCard"/>
+    </div>
+    <div class="col-sm-6">
+        <iscomment>Order History</iscomment>
+        <isif condition="${pdict.account.orderHistory}">
+            <isset name="order" value="${pdict.account.orderHistory}" scope="page"/>
+            <isinclude template="account/order/orderHistoryCard"/>
+        </isif>
+        <iscomment>Payment</iscomment>
+        <isinclude template="account/paymentCard"/>
+
+        <iscomment>Available Coupons (plugin_customer_coupons)</iscomment>
+        <isinclude template="account/couponsCard"/>
+    </div>
+</div>

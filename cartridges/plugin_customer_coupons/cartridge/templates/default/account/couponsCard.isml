@@ -1,0 +1,14 @@
+<iscomment>マイページのダッシュボードに表示する「利用可能クーポン」への導線カード。</iscomment>
+<div class="card">
+    <div class="card-header clearfix">
+        <h2 class="pull-left">${Resource.msg('coupons.card.heading', 'coupons', null)}</h2>
+    </div>
+    <div class="card-body">
+        <p>${Resource.msg('coupons.card.body', 'coupons', null)}</p>
+    </div>
+    <div class="card-footer clearfix">
+        <a href="${URLUtils.url('Account-Coupons')}" aria-label="${Resource.msg('coupons.card.link', 'coupons', null)}">
+            ${Resource.msg('coupons.card.link', 'coupons', null)}
+        </a>
+    </div>
+</div>

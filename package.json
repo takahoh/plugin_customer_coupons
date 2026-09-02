@@ -1,0 +1,21 @@
+{
+  "name": "plugin_customer_coupons",
+  "version": "1.0.0",
+  "description": "SFRA plugin cartridge that shows a customer's usable coupons on My Account.",
+  "license": "MIT",
+  "author": "takahoh",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takahoh/plugin_customer_coupons.git"
+  },
+  "keywords": [
+    "sfra",
+    "b2c-commerce",
+    "salesforce-commerce-cloud",
+    "cartridge",
+    "coupons"
+  ],
+  "engines": {
+    "node": ">=12"
+  }
+}

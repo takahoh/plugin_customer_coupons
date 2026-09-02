@@ -1,0 +1,69 @@
+<isdecorate template="common/layout/page">
+    <isscript>
+        var assets = require('*/cartridge/scripts/assets.js');
+        assets.addCss('/css/account/profile.css');
+    </isscript>
+
+    <div class="hero slant-down account-image">
+        <h1 class="page-title">${Resource.msg('coupons.page.title', 'coupons', null)}</h1>
+    </div>
+
+    <div class="container">
+        <!---Breadcrumbs--->
+        <isinclude template="components/breadcrumbs/pageBreadcrumbs"/>
+
+        <div class="row justify-content-center">
+            <div class="col-sm-10 col-md-8">
+                <isif condition="${pdict.coupons.isEmpty}">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <p class="mb-0">${Resource.msg('coupons.empty', 'coupons', null)}</p>
+                        </div>
+                    </div>
+                <iselse/>
+                    <isif condition="${!pdict.coupons.hasBasket}">
+                        <div class="alert alert-info" role="alert">
+                            ${Resource.msg('coupons.no.basket.note', 'coupons', null)}
+                        </div>
+                    </isif>
+
+                    <!--- 使えるクーポン（カートで判定済み） --->
+                    <isif condition="${pdict.coupons.usable.length > 0}">
+                        <h2 class="coupons-section-heading">${Resource.msg('coupons.section.usable', 'coupons', null)}</h2>
+                        <isloop items="${pdict.coupons.usable}" var="coupon">
+                            <isset name="coupon" value="${coupon}" scope="page"/>
+                            <isset name="couponState" value="usable" scope="page"/>
+                            <isinclude template="account/coupons/couponCard"/>
+                        </isloop>
+                    </isif>
+
+                    <!--- 候補（カートが無く判定できないもの） --->
+                    <isif condition="${pdict.coupons.needsBasket.length > 0}">
+                        <h2 class="coupons-section-heading">${Resource.msg('coupons.section.candidates', 'coupons', null)}</h2>
+                        <isloop items="${pdict.coupons.needsBasket}" var="coupon">
+                            <isset name="coupon" value="${coupon}" scope="page"/>
+                            <isset name="couponState" value="candidate" scope="page"/>
+                            <isinclude template="account/coupons/couponCard"/>
+                        </isloop>
+                    </isif>
+
+                    <!--- 利用済み --->
+                    <isif condition="${pdict.coupons.redeemed.length > 0}">
+                        <h2 class="coupons-section-heading">${Resource.msg('coupons.section.redeemed', 'coupons', null)}</h2>
+                        <isloop items="${pdict.coupons.redeemed}" var="coupon">
+                            <isset name="coupon" value="${coupon}" scope="page"/>
+                            <isset name="couponState" value="redeemed" scope="page"/>
+                            <isinclude template="account/coupons/couponCard"/>
+                        </isloop>
+                    </isif>
+                </isif>
+
+                <div class="text-center mt-3">
+                    <a href="${URLUtils.url('Account-Show')}" class="normal">
+                        ${Resource.msg('coupons.back.to.account', 'coupons', null)}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</isdecorate>

@@ -1,0 +1,35 @@
+<iscomment>
+    1件のクーポンを表すカード。page スコープで受け取る変数:
+    coupon = CustomerCoupons が組み立てたクーポン情報
+    couponState = "usable" / "candidate" / "redeemed"
+</iscomment>
+<div class="card coupon-card coupon-card--${couponState}">
+    <div class="card-body">
+        <h3 class="coupon-promotion-name">${coupon.promotionName}</h3>
+
+        <isif condition="${coupon.calloutMsg}">
+            <div class="coupon-callout">${coupon.calloutMsg}</div>
+        </isif>
+
+        <isif condition="${coupon.details}">
+            <div class="coupon-details">${coupon.details}</div>
+        </isif>
+
+        <div class="coupon-code-row">
+            <isif condition="${coupon.couponCode}">
+                <span class="coupon-code-label">${Resource.msg('coupons.code.label', 'coupons', null)}</span>
+                <span class="coupon-code">${coupon.couponCode}</span>
+            <iselse/>
+                <span class="coupon-issue-note">${Resource.msg('coupons.requires.issue', 'coupons', null)}</span>
+            </isif>
+        </div>
+
+        <isif condition="${couponState === 'usable'}">
+            <span class="badge badge-success">${Resource.msg('coupons.status.usable', 'coupons', null)}</span>
+        <iselseif condition="${couponState === 'redeemed'}"/>
+            <span class="badge badge-secondary">${Resource.msg('coupons.status.redeemed', 'coupons', null)}</span>
+        <iselse/>
+            <span class="badge badge-info">${Resource.msg('coupons.status.candidate', 'coupons', null)}</span>
+        </isif>
+    </div>
+</div>
